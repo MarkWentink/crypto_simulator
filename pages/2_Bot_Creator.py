@@ -185,11 +185,9 @@ if valid_bot:
             </style>""", unsafe_allow_html=True)
         save = st.button('Save bot')
 
-
-        @st.cache_data 
-        def save_bot(_bot, prices):
+        def save_bot(bot, prices):
             bot.new_simulate_update(prices)
-            joblib.dump(_bot, './bots/'+bot_name+'.pkl')
+            joblib.dump(bot, './bots/'+bot_name+'.pkl')
             st.write('Bot Saved')
         if save:
             save_bot(bot, prices)

@@ -77,4 +77,5 @@ m = st.markdown("""
     </style>""", unsafe_allow_html=True)
 deleting = st.button('Delete all created bots')
 if deleting:
-    st.cache_resource.clear()
+    for path in ['bots/'+file_name for file_name in os.listdir('bots/') if file_name not in ['0_BTC only.pkl', '0_split all.pkl']]:
+        os.remove(path)
