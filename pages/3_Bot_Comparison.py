@@ -38,6 +38,7 @@ comparison_df.index=[bot.name for bot in bots]
 st.subheader('Summary Table')
 st.dataframe(comparison_df[['Current value', 'Total return', 'Annualised return %', 'Volatility']].sort_values(by='Annualised return %', ascending=False))
 
+
 st.write('''**Note**: Volatility is calculated as the standard deviation of daily percentage changes.''')
 st.write('''**Warning**: Although annualised returns are likely to be very high, this is not represented of the crypto market. 
          2023-01-01 happened to be a good time to get into the market.
@@ -64,3 +65,16 @@ fig.update_xaxes(rangeslider_visible = True,
 fig.update_layout(legend_title_text='Portfolio', width=750)
 
 st.plotly_chart(fig)
+
+
+# Delete bots button
+m = st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        background-color: #902923;
+        color:#ffffff;
+    }
+    </style>""", unsafe_allow_html=True)
+deleting = st.button('Delete all created bots')
+if deleting:
+    st.cache_resource.clear()
