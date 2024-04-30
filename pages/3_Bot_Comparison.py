@@ -1,25 +1,22 @@
-import pandas as pd
-import streamlit as st
-import joblib
-import math
-import plotly.express as px
 import os
+import joblib
+import pandas as pd
 
-from crypto_bots_classes import Yahoo_interface, Price_data, Portfolio, StrategyHold, StrategyRules, portfolio_plotter
+import streamlit as st
+import plotly.express as px
+
 
 st.set_page_config(page_title="Bot Comparisons", page_icon="🔍")
 
 
-
-
 st.title("Bot Comparison")
-
 st.write('''Once you have created some trading bots, you can compare their performance here.
          For comparison, we have pre-made a 'hold BTC only' bot and a 'hold an even split of everything' bot. ''')
+
+
 bots = [joblib.load('bots/'+file_name) for file_name in os.listdir('bots/')]
 
-
-st.subheader('Summary Table')
+# Generate a summary table of bot metrics
 bot_dict = {'Start Value': [],
 'Current value' : [],
 'Total return': [],
@@ -35,15 +32,17 @@ for bot in bots:
     bot_dict['Annualised return %'].append(round(bot.roi(), 1))
     bot_dict['Volatility'].append(round(bot.volatility(), 2))
 
-
 comparison_df = pd.DataFrame.from_dict(bot_dict, orient='columns')
 comparison_df.index=[bot.name for bot in bots]
+
+st.subheader('Summary Table')
 st.dataframe(comparison_df[['Current value', 'Total return', 'Annualised return %', 'Volatility']].sort_values(by='Annualised return %', ascending=False))
 
 st.write('''**Note**: Volatility is calculated as the standard deviation of daily percentage changes.''')
 st.write('''**Warning**: Although annualised returns are likely to be very high, this is not represented of the crypto market. 
          2023-01-01 happened to be a good time to get into the market.
          Future versions of this app will seek to cross-validate strategies with multiple starting points.''')
+
 
 st.subheader('Performance over time')
 
@@ -63,6 +62,5 @@ fig.update_xaxes(rangeslider_visible = True,
                     ])
 ))
 fig.update_layout(legend_title_text='Portfolio', width=750)
-
 
 st.plotly_chart(fig)

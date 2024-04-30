@@ -1,14 +1,16 @@
+import glob
 from datetime import datetime
+import math
 import numpy as np
 import pandas as pd
-import glob
-import plotly.express as px
-import math
 
+import plotly.express as px
+import streamlit as st
 
 import yfinance as yf
 yf.pdr_override()
 from pandas_datareader import data as wb
+
 
 class Yahoo_interface():
     '''
@@ -52,7 +54,6 @@ class Yahoo_interface():
         prices['USD'] = 1
         return prices
     
-
 
 class Price_data():
     '''
@@ -114,11 +115,6 @@ class Price_data():
         print(f'Writing to filepath: {self.filepath}')
         self.prices.to_csv(self.filepath, header=True)
         
-
-
-        
-
-
 
 class Portfolio():
 
@@ -213,7 +209,6 @@ class Portfolio():
         print(self.error_log)
 
 
-
 class StrategyHold():
 
     def __init__(self ):
@@ -283,6 +278,7 @@ class StrategyRules():
 
         return sell_trades, buy_trades
 
+
 def portfolio_plotter(portfolios):
     '''
     Plots the total value of the given portfolio(s) over time as a lineplot
@@ -315,3 +311,31 @@ def portfolio_plotter(portfolios):
     fig.update_layout(legend_title_text='Portfolio', width=1000)
     fig.show()
     return 0
+
+
+@st.cache_data 
+def load_data(path):
+    '''
+    Creates a Price_data object and triggers the update_data method, which confirms the dataset currently in memory is up to date. 
+    If not, it triggers an API call to the Yahoo Finance API through pandas_datareader.
+    Once prices are updated, they are loaded in and the datetime index is set. 
+    '''
+    data = Price_data(path)
+    data.update_data()
+    prices = data.load_prices()
+    prices = prices.map(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))
+    prices = prices.rename(columns={'UNI7083-USD':'UNI-USD', 'STX4847-USD':'STX-USD'})
+    return prices
+
+
+def load_tokens(path):
+    '''
+    
+    '''
+    with open(path) as f:
+        token_list = [x.strip() for x in f.readlines()]
+        tokens = [x for x in token_list if x not in ['USD', 'USDT-USD', 'USDC-USD', 'DAI-USD', 'SHIB-USD']]
+        tokens.remove('UNI7083-USD')
+        tokens.remove('STX4847-USD')
+        tokens.extend(['UNI-USD', 'STX-USD'])
+    return tokens

@@ -1,73 +1,66 @@
+
+# Imports
 import pandas as pd
-import streamlit as st
 import joblib
-import math
-import plotly.express as px
 
-from crypto_bots_classes import Yahoo_interface, Price_data, Portfolio, StrategyHold, StrategyRules, portfolio_plotter
+import streamlit as st
 
+from crypto_bots_classes import Portfolio, StrategyHold, StrategyRules, load_data, load_tokens
+
+
+# Configs
 st.set_page_config(page_title="Bot Creator", page_icon="🤖")
 
 
+# Introduction
 st.title("Bot Creator")
 
 st.write('Time to experiment! Here, you can create simulated portfolios and trading bots.')
-st.markdown('''- Start by giving your bot a name, so that its performance can be compared to others on the next page.\n - Pick a trading strategy. This determines how your bot decides to buy and sell currencies.\n - Pick a portfolio allocation. If you're defining a rules-based strategy, your bot simply starts with $1000 cash,
-         but you can still select which currencies you want your bot to consider when making trades.\n - Review the details of your bot, and click **save**.''')
+st.markdown(
+    '''
+    - Start by giving your bot a name, so we know what to call it!
+    - Pick a trading strategy. This determines how your bot decides to buy and sell currencies.
+    - Pick a portfolio allocation. If you're defining a rules-based strategy, your bot simply starts with $1000 cash,
+         but you can still select which currencies you want your bot to consider when making trades.
+    - Review the details of your bot, and click **save**.
+''')
 st.write("Once created, you can compare your bots performance against others on the 'Bot Comparison' page")
 
-@st.cache_data # <- add decorators after tried running the load multiple times
-def load_data(path):
-    df = pd.read_csv(path)
-    return df
 
-df = load_data("prices.csv")
-df = df.set_index('Date')
-df = df.applymap(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))
-
-#st.sidebar.subheader("Usage filters")
+# Load data
+prices = load_data("data/prices.csv")
 
 
-with open('token_list.txt') as f:
-    token_list = [x.strip() for x in f.readlines()]
-tokens = [x for x in token_list if x not in ['USD', 'USDT-USD', 'USDC-USD', 'DAI-USD', 'SHIB-USD']]
-tokens.remove('UNI7083-USD')
-tokens.remove('STX4847-USD')
-tokens.extend(['UNI-USD', 'STX-USD'])
+# Load list of considered tokens
+tokens = load_tokens('data/token_list.txt')
 
-data = Price_data('prices.csv')
-data.update_data()
-prices = data.load_prices()
-prices = prices.rename(columns={'UNI7083-USD':'UNI-USD', 'STX4847-USD':'STX-USD'})
 
-valid_bot = False
-
+# Name your bot
 st.subheader('Name your bot')
-cols = st.columns(2)
-with cols[0]:
+with st.columns(2)[0]:
     bot_name = st.text_input('Name', value='my_bot')
 
+
+# Trade strategies
 st.divider()
 st.subheader('Trading Strategy')
 
-cols = st.columns(2)
-with cols[0]:
+valid_bot = False # if the trading strategy section is filled in correctly, the bot summary section appears
+
+with st.columns(2)[0]:
     strategy = st.selectbox('Choose a trading strategy', options = ['HOLD', 'RULES'])
+
 if strategy == 'HOLD':
     st.write('''A HOLD strategy does not perform any trades. 
              It simply holds on to the initially defined portfolio split, and tracks its value over time.''')
+    hold = StrategyHold()
 
-
-
-
-
-
-if strategy == 'HOLD':
     st.divider()
     st.subheader('Portfolio Allocation')
-    hold = StrategyHold()
-    alloc = st.selectbox('You can evenly spread the money over a selection of coins, or manually define an allocation.', options = ['Even', 'Manual'])
-
+    
+    alloc = st.selectbox('You can evenly spread the money over a selection of coins, or manually define an allocation.', 
+                         options = ['Even', 'Manual'])
+    # Even allocation
     if alloc == 'Even':
         st.write('Select which tokens to include in your portfolio:')
 
@@ -82,6 +75,7 @@ if strategy == 'HOLD':
         bot = Portfolio(bot_name, allocation, '2023-01-01', 1000, prices, hold)
         valid_bot = True
 
+    # Manual allocation
     elif alloc == 'Manual':
         st.write('Fill in a dollar amount for the tokens you want in your portfolio. The total must add up to $1000.')
 
@@ -97,15 +91,13 @@ if strategy == 'HOLD':
             bot = Portfolio(bot_name, allocation, '2023-01-01', 1000, prices, hold)
             valid_bot = True
 
-
-
-
-
 elif strategy == 'RULES':
     st.write('''A rules-based strategy will buy and sell currency based on specified conditions. 
              Use the fields below to define your trading strategy: ''')
     st.write('')
     rules_cols = st.columns(2, gap='medium')
+
+    # Buy rules
     with rules_cols[0]:
         st.write('**1. Define a BUY rule:**')
         buy_rule = st.selectbox('Consecutive or window?', options = ['consecutive', 'window'])
@@ -124,6 +116,7 @@ elif strategy == 'RULES':
             exposure = st.number_input('Max share of portfolio in \%', 1, 100, 20)
             buy_rule_string = f'BUY up to **{exposure}\%** of total portfolio value of a coin if its price has gone up by at least **{buy_signal}\%** in the last **{buy_period}** days.'
     
+    # sell rules
     with rules_cols[1]:
         st.write('**2. Define a SELL rule**')
         sell_rule = st.selectbox('hold or reversal?', options = ['hold', 'reversal']) 
@@ -138,16 +131,13 @@ elif strategy == 'RULES':
             sell_days = st.number_input('patience: sell after how many consecutive drops?', 1, 100, 2, 1)
             sell_rule_string = f"SELL a coin once its price has dropped on **{sell_days}** consecutive days."
 
-
-
-
+    # Rule summary
     st.write('**Defined rules**')
     st.write(buy_rule_string)
     st.write(sell_rule_string)
 
-
-
     trend = StrategyRules(buy_rule, buy_period, 0, sell_rule, sell_days, exposure)
+    
     st.divider()
     st.subheader('Portfolio Allocation')
     st.write('For a rules based strategy, your bot will start with a $1000 in cash, and no crypto-currencies.')
@@ -169,7 +159,7 @@ elif strategy == 'RULES':
     valid_bot = True
 
 
-
+# Summary section
 if valid_bot:
 
     st.divider()
@@ -177,6 +167,7 @@ if valid_bot:
     st.write("When you're ready, save your bot, and compare its performance against others on the Bot Comparison page")
 
     summary_cols = st.columns(3)
+    # High level overview and save button
     with summary_cols[0]:
         st.markdown('__Bot Details__:')
         st.write('__Bot name__:',bot.name )
@@ -184,7 +175,7 @@ if valid_bot:
         st.write('__Start Amount__:', bot.start_value)
         st.write('')
 
-        #save = st.button('Save Bot', ) # on_click, save and pickle the bot
+        # Export bot button
         m = st.markdown("""
             <style>
             div.stButton > button:first-child {
@@ -195,10 +186,9 @@ if valid_bot:
         save = st.button('Save bot')
         if save:
             bot.new_simulate_update(prices)
-
-            st.write('Bot Saved')
             joblib.dump(bot, './bots/'+bot_name+'.pkl')
-
+            st.write('Bot Saved')
+    # strategy summary
     with summary_cols[1]:
         st.write('__Trading Strategy:__')
         if strategy == 'HOLD':
@@ -208,9 +198,10 @@ if valid_bot:
             st.write('__RULES__')
             st.write(buy_rule_string)
             st.write(sell_rule_string)
+    # Allocation summary
     with summary_cols[2]:
         st.write('__Start allocation__:')
-        allocation_df = pd.DataFrame(bot.values.iloc[-1])
+        allocation_df = pd.DataFrame(bot.values.iloc[0])
         allocation_df.columns = ['USD allocated']
         allocation_df.index = [x[:-4] if len(x)>4 else x for x in allocation_df.index]
         st.write(allocation_df)
