@@ -1,0 +1,42 @@
+
+# Pearl, light steel blue, orange-red
+
+# Primary accent for interactive elements
+primaryColor = '#FF8552'
+
+# Background color for the main content area
+backgroundColor = '#E6E6E6'
+
+# Background color for sidebar and most interactive widgets
+secondaryBackgroundColor = '#82ACAC'
+
+# Color used for almost all text
+textColor = '#272728'
+
+# Font family for all text in the app, except code blocks
+# Accepted values (serif | sans serif | monospace) 
+# Default: "sans serif"
+font = "sans serif"
+
+
+
+# Light grey, greenish grey, wine red
+
+[theme]
+
+# Primary accent for interactive elements
+primaryColor = '#902923'
+
+# Background color for the main content area
+backgroundColor = '#D6D5C9'
+
+# Background color for sidebar and most interactive widgets
+secondaryBackgroundColor = '#B9BAA3'
+
+# Color used for almost all text
+textColor = '#272728'
+
+# Font family for all text in the app, except code blocks
+# Accepted values (serif | sans serif | monospace) 
+# Default: "sans serif"
+font = "sans serif"
