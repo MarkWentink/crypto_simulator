@@ -7,7 +7,7 @@ import plotly.express as px
 
 import streamlit as st
 
-from crypto_bots_classes import load_data, load_tokens
+from crypto_bots_classes import load_data, load_tokens, formatted_plotter
 
 # Configs
 st.set_page_config(page_title="Market Overview", page_icon="📈")
@@ -49,19 +49,8 @@ st.subheader('Historical Prices - Absolute')
 st.write('''As well as selecting coins in the left sidebar, 
          you can click their label in the graph legend to include or exclude them.
          This can help if you need a quick look at one particular, or a pair of currencies.''')
+st.plotly_chart(formatted_plotter(df))
 
-fig = px.line(df)
-fig.update_xaxes(rangeslider_visible = True,
-                     rangeselector=dict(
-                        buttons=list([
-                            dict(count=1, label="1m", step="month", stepmode="backward"),
-                            dict(count=6, label="6m", step="month", stepmode="backward"),
-                            dict(count=1, label="YTD", step="year", stepmode="todate"),
-                            dict(count=1, label="1y", step="year", stepmode="backward"),
-                            dict(step="all")
-                        ])
-    ))
-st.plotly_chart(fig)
 
 # Historical Prices - normalised
 st.subheader('Historical Prices - Normalised')
@@ -69,18 +58,7 @@ st.write('''Below, all prices have been normalised to start at 1, so that relati
          For example, although Bitcoin (BTC) has the highest absolute price, it's Solana (SOL) and Stacks (STX) that have seen
          the highest relative growth since 2023, currently worth about 10-15 times what they were back then.''')
 norm_df = df.divide(df.iloc[0])
-fig = px.line(norm_df)
-fig.update_xaxes(rangeslider_visible = True,
-                     rangeselector=dict(
-                        buttons=list([
-                            dict(count=1, label="1m", step="month", stepmode="backward"),
-                            dict(count=6, label="6m", step="month", stepmode="backward"),
-                            dict(count=1, label="YTD", step="year", stepmode="todate"),
-                            dict(count=1, label="1y", step="year", stepmode="backward"),
-                            dict(step="all")
-                        ])
-    ))
-st.plotly_chart(fig)
+st.plotly_chart(formatted_plotter(norm_df))
 
 
 # Correlation heatmap
@@ -91,8 +69,12 @@ st.write('''A correlation score close to 1 would indicate very similar price flu
          while a negative number would indicate an opposing relationship: when one goes up, the other goes down.
          ''')
 
-# Define colour palette based on colour choices in main theme
-colours = sns.diverging_palette(220, 3, as_cmap=True,s=61, l=25)
+sns.set_style(rc={'axes.facecolor':'#D6D5C9', 'figure.facecolor':'#D6D5C9'})
 # heatmap
-corr_fig = sns.heatmap(df.corr(), cmap=colours, center=0, vmax=1, annot=True, mask = np.triu(df.corr()))
+corr_fig = sns.heatmap(df.corr(), 
+                       cmap=sns.diverging_palette(220, 3, as_cmap=True,s=61, l=25), 
+                       center=0, 
+                       vmax=1, 
+                       annot=True, 
+                       mask = np.triu(df.corr()))
 st.pyplot(corr_fig.figure)

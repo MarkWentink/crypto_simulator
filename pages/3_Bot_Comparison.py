@@ -5,6 +5,8 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
+from crypto_bots_classes import formatted_plotter
+
 
 st.set_page_config(page_title="Bot Comparisons", page_icon="🔍")
 
@@ -45,26 +47,9 @@ st.write('''**Warning**: Although annualised returns are likely to be very high,
          Future versions of this app will seek to cross-validate strategies with multiple starting points.''')
 
 
+# portfolio comparison over time
 st.subheader('Performance over time')
-
-plot_data = pd.DataFrame()
-for bot in bots:
-    plot_data = pd.concat([plot_data, pd.DataFrame(bot.value_history(), columns=[bot.name])])
-
-fig = px.line(plot_data)
-fig.update_xaxes(rangeslider_visible = True,
-                    rangeselector=dict(
-                    buttons=list([
-                        dict(count=1, label="1m", step="month", stepmode="backward"),
-                        dict(count=6, label="6m", step="month", stepmode="backward"),
-                        dict(count=1, label="YTD", step="year", stepmode="todate"),
-                        dict(count=1, label="1y", step="year", stepmode="backward"),
-                        dict(step="all")
-                    ])
-))
-fig.update_layout(legend_title_text='Portfolio', width=750)
-
-st.plotly_chart(fig)
+st.plotly_chart(formatted_plotter(bots))
 
 
 # Delete bots button

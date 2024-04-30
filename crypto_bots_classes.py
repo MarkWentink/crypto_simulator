@@ -279,7 +279,7 @@ class StrategyRules():
         return sell_trades, buy_trades
 
 
-def portfolio_plotter(portfolios):
+def formatted_plotter(portfolios):
     '''
     Plots the total value of the given portfolio(s) over time as a lineplot
 
@@ -289,8 +289,9 @@ def portfolio_plotter(portfolios):
     returns
     a plotly lineplot showing the given portfolios' value histories
     '''
-
-    if isinstance(portfolios, list):
+    if isinstance(portfolios, pd.DataFrame):
+        plot_data = portfolios
+    elif isinstance(portfolios, list):
         plot_data = pd.DataFrame()
         for portfolio in portfolios:
             plot_data = pd.concat([plot_data, pd.DataFrame(portfolio.value_history(), columns=[portfolio.name])], axis=1)
@@ -308,9 +309,9 @@ def portfolio_plotter(portfolios):
                             dict(step="all")
                         ])
     ))
-    fig.update_layout(legend_title_text='Portfolio', width=1000)
-    fig.show()
-    return 0
+    fig.update_layout(legend_title_text='Portfolio')
+    #fig.show()
+    return fig
 
 
 @st.cache_data 
