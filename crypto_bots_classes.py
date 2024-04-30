@@ -171,31 +171,31 @@ class Portfolio():
         value = math.floor(self.holdings.loc[date, coin]*prices.loc[date, coin]*100)/100.0
         self.holdings.loc[date, 'USD'] += value
         self.holdings.loc[date, coin] = 0
-        print(f'Sold {coin} worth: {value}') 
+        #print(f'Sold {coin} worth: {value}') 
         self.hold_duration.pop(coin)  
         return
 
     def execute_buy(self, coin, value, date, prices):
         if value > self.holdings.loc[date, 'USD']:
-            print('Not enough cash available')
+            #print('Not enough cash available')
             self.error_log['not enough cash'] += 1
             return
         else:
             self.holdings.loc[date, 'USD'] = self.holdings.loc[date, 'USD'] - value
             self.holdings.loc[date, coin] = self.holdings.loc[date, coin] + (value/prices.loc[date, coin])
-            print(f'bought {coin} worth: {value}')
+            #print(f'bought {coin} worth: {value}')
             self.hold_duration[coin] = 0
             return     
     
     def new_simulate_update(self, prices):
 
         for date in pd.date_range(start=self.holdings.index[-1]+pd.DateOffset(days=1), end=prices.index[-1] ):
-            print(date)
+            #print(date)
             # new row in holdings table
             self.holdings.loc[date, :] = self.holdings.loc[date-pd.DateOffset(days=1), :]
             # increment hold_durations
             self.hold_duration = {k: v+1 for k,v in self.hold_duration.items()}
-            print(self.hold_duration)
+            #print(self.hold_duration)
             
             # consult strategy
             # strategy returns list of sell trades as strings 'coin'
