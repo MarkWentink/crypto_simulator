@@ -46,6 +46,7 @@ st.markdown(
     - Add model-based strategies, that will buy and sell based on predictive modelling
     - Add detailed logs of what trades a bot has made, how many of them were profitable, and by how much
     - Add model-updating capabilities to avoid models going stale over time
+    - Build functionality to automatically explore a wide range of trading strategy parameters. 
 
 """
 )

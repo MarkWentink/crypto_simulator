@@ -12,7 +12,7 @@ yf.pdr_override()
 from pandas_datareader import data as wb
 
 
-class Yahoo_interface():
+class YahooInterface():
     '''
     Interface class to process Yahoo Finance API calls. 
     Should be initialised with a list of relevant tokens, and a start date.
@@ -55,7 +55,7 @@ class Yahoo_interface():
         return prices
     
 
-class Price_data():
+class PriceData():
     '''
     dataset object for historical price data. 
     Initialised with a csv filepath. 
@@ -94,7 +94,7 @@ class Price_data():
         self.last_date = self.prices.index[-1].date()
 
         if self.last_date != datetime.today().date():
-            interface = Yahoo_interface(self.prices.columns, self.last_date)
+            interface = YahooInterface(self.prices.columns, self.last_date)
             new_prices = interface.retrieve_all()
             self.prices = pd.concat([self.prices, new_prices])
             self.prices.to_csv(self.filepath, header = True)
@@ -109,7 +109,7 @@ class Price_data():
                 print(f'{self.filepath} already exists. Use kwarg overwrite=True to overwrite existing files.')
                 return -1
 
-        interface = Yahoo_interface(token_list, start_date)
+        interface = YahooInterface(token_list, start_date)
         self.prices = interface.retrieve_all()
 
         print(f'Writing to filepath: {self.filepath}')
@@ -321,7 +321,7 @@ def load_data(path):
     If not, it triggers an API call to the Yahoo Finance API through pandas_datareader.
     Once prices are updated, they are loaded in and the datetime index is set. 
     '''
-    data = Price_data(path)
+    data = PriceData(path)
     data.update_data()
     prices = data.load_prices()
     prices = prices.map(lambda x: round(x, 4 - int(math.floor(math.log10(abs(x))))))
