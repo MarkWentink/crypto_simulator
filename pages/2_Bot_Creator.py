@@ -21,7 +21,6 @@ key_dict = json.loads(st.secrets["textkey"])
 creds = service_account.Credentials.from_service_account_info(key_dict)
 db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
 
-
 # Introduction
 st.title("Bot Creator")
 
@@ -195,10 +194,9 @@ if valid_bot:
             </style>""", unsafe_allow_html=True)
         save = st.button('Save bot')
 
-        def save_bot(bot, prices):
+        def save_bot(bot, prices, db):
             bot.new_simulate_update(prices)
-            joblib.dump(bot, './bots/'+bot_name+'.pkl')
-            st.write('Bot Saved')
+
             doc_ref = db.collection("bot_creation").document(str(datetime.today()))
             doc_ref.set({'timestamp':datetime.today(),
                          'bot_name':bot_name,
@@ -206,8 +204,11 @@ if valid_bot:
                          'allocation':bot.initial_split,
                          'roi':bot.roi(),
                          'volatility':round(bot.volatility(), 2)})
+            joblib.dump(bot, './bots/'+bot_name+'.pkl')
+            st.write('Bot Saved')
+        
         if save:
-            save_bot(bot, prices)
+            save_bot(bot, prices, db)
 
             
     # strategy summary
