@@ -16,3 +16,4 @@ textColor = '#272728'
 # Accepted values (serif | sans serif | monospace) 
 # Default: "sans serif"
 font = "sans serif"
+

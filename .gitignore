@@ -1,2 +1,4 @@
 cryptobots.ipynb
 other_themes.toml
+.streamlit/secrets.toml
+bots/

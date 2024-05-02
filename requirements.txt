@@ -3,3 +3,4 @@ seaborn==0.13.0
 yfinance==0.2.38
 joblib==1.2.0
 plotly==5.19.0
+google-cloud-firestore==2.16.0

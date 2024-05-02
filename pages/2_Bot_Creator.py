@@ -2,14 +2,24 @@
 # Imports
 import pandas as pd
 import joblib
+import json
 
 import streamlit as st
+from google.cloud import firestore
+from google.oauth2 import service_account
+from datetime import datetime
+
 
 from crypto_bots_classes import Portfolio, StrategyHold, StrategyRules, load_data, load_tokens
 
 
-# Configs
+# streamlit Configs
 st.set_page_config(page_title="Bot Creator", page_icon="🤖")
+
+# Firestore log file config
+key_dict = json.loads(st.secrets["textkey"])
+creds = service_account.Credentials.from_service_account_info(key_dict)
+db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
 
 
 # Introduction
@@ -189,8 +199,16 @@ if valid_bot:
             bot.new_simulate_update(prices)
             joblib.dump(bot, './bots/'+bot_name+'.pkl')
             st.write('Bot Saved')
+            doc_ref = db.collection("bot_creation").document(str(datetime.today()))
+            doc_ref.set({'timestamp':datetime.today(),
+                         'bot_name':bot_name,
+                         'strategy':bot.strategy.description,
+                         'allocation':bot.initial_split,
+                         'roi':bot.roi(),
+                         'volatility':round(bot.volatility(), 2)})
         if save:
             save_bot(bot, prices)
+
             
     # strategy summary
     with summary_cols[1]:

@@ -27,7 +27,7 @@ st.markdown(
 """
 )
 
-
+st.markdown('Find out more about the code implementation on [my blog](https://dsed.uk/posts/cryptobot_data/).')
 
 st.divider()
 

@@ -121,17 +121,18 @@ class Portfolio():
     def __init__(self, name, initial_split, start_date, start_value, prices, strategy):
 
         self.strategy = strategy
+        self.initial_split = initial_split
         self.start_value = start_value
         self.error_log = {'not enough cash': 0}
         
-        assert round(sum(list(initial_split.values())), 2) == 1, 'initial_split must add up to 1'
+        assert round(sum(list(self.initial_split.values())), 2) == 1, 'initial_split must add up to 1'
         self.initial_state = {}
 
-        if 'USD' not in initial_split.keys():
+        if 'USD' not in self.initial_split.keys():
             self.initial_state['USD'] = 0
         
-        for token in initial_split.keys():
-            self.initial_state[token] = (initial_split[token]*self.start_value)/(prices.loc[start_date, token])
+        for token in self.initial_split.keys():
+            self.initial_state[token] = (self.initial_split[token]*self.start_value)/(prices.loc[start_date, token])
 
 
         self.holdings = pd.DataFrame.from_dict({k: [v] for k,v in self.initial_state.items()}) 
@@ -212,12 +213,14 @@ class Portfolio():
 class StrategyHold():
 
     def __init__(self ):
+        self.description = 'HOLD'
         return
 
     def think(self, portfolio, date, prices):
         sell_trades = []
         buy_trades = []
         return sell_trades, buy_trades
+    
 
 
 class StrategyRules():
@@ -230,6 +233,7 @@ class StrategyRules():
         self.sell_rule = sell_rule
         self.sell_period = sell_period
         self.exposure = exposure
+        self.description = f'Rules: {self.rules}'
         return
 
     def think(self, portfolio, date, prices):
