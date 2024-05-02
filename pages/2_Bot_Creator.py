@@ -20,6 +20,8 @@ st.set_page_config(page_title="Bot Creator", page_icon="🤖")
 key_dict = json.loads(st.secrets["textkey"])
 creds = service_account.Credentials.from_service_account_info(key_dict)
 db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
+st.write(db)
+st.write(key_dict)
 
 
 # Introduction
