@@ -22,8 +22,8 @@ creds = service_account.Credentials.from_service_account_info(key_dict)
 db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
 st.write(db)
 st.write(key_dict)
-doc_ref = db.collection("bot_creation").document('test')
-st.write(doc_ref.get().to_dict())
+doc_ref = db.collection("bot_creation").document('dummy')
+doc_ref.set({'foo':'bar'})
 
 
 # Introduction
