@@ -23,7 +23,7 @@ db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
 st.write(db)
 st.write(key_dict)
 doc_ref = db.collection("bot_creation").document('test')
-st.write(doc_ref.get())
+st.write(doc_ref.get().to_dict())
 
 
 # Introduction
