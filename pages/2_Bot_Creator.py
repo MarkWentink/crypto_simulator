@@ -3,6 +3,7 @@
 import pandas as pd
 import joblib
 import json
+import os
 
 import streamlit as st
 from google.cloud import firestore
@@ -15,6 +16,8 @@ from crypto_bots_classes import Portfolio, StrategyHold, StrategyRules, load_dat
 
 # streamlit Configs
 st.set_page_config(page_title="Bot Creator", page_icon="🤖")
+if 'bots' not in st.session_state:
+    st.session_state['bots'] = [joblib.load('bots/'+file_name) for file_name in os.listdir('bots/')]
 
 # Firestore log file config
 key_dict = json.loads(st.secrets["textkey"])
@@ -204,8 +207,10 @@ if valid_bot:
                          'allocation':bot.initial_split,
                          'roi':bot.roi(),
                          'volatility':round(bot.volatility(), 2)})
-            joblib.dump(bot, './bots/'+bot_name+'.pkl')
+            #joblib.dump(bot, './bots/'+bot_name+'.pkl')
+            st.session_state['bots'].append(bot)
             st.write('Bot Saved')
+            
         
         if save:
             save_bot(bot, prices, db)

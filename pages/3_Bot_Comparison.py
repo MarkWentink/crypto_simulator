@@ -9,14 +9,14 @@ from crypto_bots_classes import formatted_plotter
 
 
 st.set_page_config(page_title="Bot Comparisons", page_icon="🔍")
-
+if 'bots' not in st.session_state:
+    st.session_state['bots'] = [joblib.load('bots/'+file_name) for file_name in os.listdir('bots/')]
 
 st.title("Bot Comparison")
 st.write('''Once you have created some trading bots, you can compare their performance here.
          For comparison, we have pre-made a 'hold BTC only' bot and a 'hold an even split of everything' bot. ''')
 
-
-bots = [joblib.load('bots/'+file_name) for file_name in os.listdir('bots/')]
+bots = st.session_state['bots']
 
 # Generate a summary table of bot metrics
 bot_dict = {'Start Value': [],
