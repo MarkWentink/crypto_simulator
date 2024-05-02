@@ -207,7 +207,7 @@ if valid_bot:
         def save_bot(bot, prices, db):
             bot.new_simulate_update(prices)
 
-            doc_ref = db.collection("bot_creation").document('test3')
+            doc_ref = db.collection("bot_creation").document(str(datetime.today()))
             doc_ref.set({'timestamp':datetime.today(),
                          'bot_name':bot_name,
                          'strategy':bot.strategy.description,
