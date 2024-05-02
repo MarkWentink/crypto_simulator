@@ -21,6 +21,13 @@ key_dict = json.loads(st.secrets["textkey"])
 creds = service_account.Credentials.from_service_account_info(key_dict)
 db = firestore.Client(credentials=creds, project="build-a-bot-traffic-log")
 
+doc_ref = db.collection("bot_creation").document(str(datetime.today()))
+doc_ref.set({'timestamp':datetime.today(),
+             'bot_name':'Omega',
+             'strategy':'Hold',
+             'allocation':{'USD':1000},
+             'roi':3.24,
+             'volatility':2.11})
 
 # Introduction
 st.title("Bot Creator")
