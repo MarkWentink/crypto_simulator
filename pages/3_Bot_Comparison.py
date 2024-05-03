@@ -75,7 +75,7 @@ with st.columns(3)[0]:
 if deep.trades_log.shape[0] > 0:
     st.dataframe(deep.trades_log, use_container_width=True)
     st.write(f"**{deep.trades_log.shape[0]}** trades were made, **{sum(deep.trades_log['profit']>0)}** of which were profitable and **{sum(deep.trades_log['profit'].isna())}** remain open.")
-    st.write(f"The average profit per trade is **\${round(deep.trades_log['profit'].mean(), 2)}** or **{round((deep.trades_log['profit']/deep.trades_log['buy_value']).mean(), 2)}**\%.")
+    st.write(f"The average profit per trade is **\${round(deep.trades_log['profit'].mean(), 2)}** or **{round((deep.trades_log['profit']/deep.trades_log['buy_value']).mean(), 2)*100}**\%.")
     st.write(f"The best trade made **\${round(deep.trades_log['profit'].max(), 2)}** and the worst **\${round(deep.trades_log['profit'].min(), 2)}**")
 else:
     st.write('No trades were made. This was the original dollar allocation:')
