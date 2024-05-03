@@ -46,12 +46,6 @@ st.write('''**Warning**: Although annualised returns are likely to be very high,
          2023-01-01 happened to be a good time to get into the market.
          Future versions of this app will seek to cross-validate strategies with multiple starting points.''')
 
-
-# portfolio comparison over time
-st.subheader('Performance over time')
-st.plotly_chart(formatted_plotter(bots))
-
-
 # Delete bots button
 m = st.markdown("""
     <style>
@@ -60,7 +54,31 @@ m = st.markdown("""
         color:#ffffff;
     }
     </style>""", unsafe_allow_html=True)
-deleting = st.button('Delete all created bots')
-if deleting:
-    for path in ['bots/'+file_name for file_name in os.listdir('bots/') if file_name not in ['0_BTC only.pkl', '0_split all.pkl']]:
-        os.remove(path)
+if st.button('Delete all created bots'):
+    st.session_state['bots'] = [joblib.load('bots/'+file_name) for file_name in os.listdir('bots/')]
+    st.experimental_rerun()
+
+
+
+# portfolio comparison over time
+st.subheader('Performance over time')
+st.plotly_chart(formatted_plotter(bots))
+
+
+
+
+# Deep dive
+st.subheader('Trade log')
+with st.columns(3)[0]:
+    deep = st.selectbox('Bot', options = tuple([bot for bot in bots]), format_func=lambda x : x.name)
+
+if deep.trades_log.shape[0] > 0:
+    st.dataframe(deep.trades_log, use_container_width=True)
+    st.write(f"**{deep.trades_log.shape[0]}** trades were made, **{sum(deep.trades_log['profit']>0)}** of which were profitable and **{sum(deep.trades_log['profit'].isna())}** remain open.")
+    st.write(f"The average profit per trade is **\${round(deep.trades_log['profit'].mean(), 2)}** or **{round((deep.trades_log['profit']/deep.trades_log['buy_value']).mean(), 2)}**\%.")
+    st.write(f"The best trade made **\${round(deep.trades_log['profit'].max(), 2)}** and the worst **\${round(deep.trades_log['profit'].min(), 2)}**")
+else:
+    st.write('No trades were made. This was the original dollar allocation:')
+    initial = pd.DataFrame(deep.values.iloc[0, :])
+    initial.index = [x[:-4] if x != 'USD' else x for x in initial.index]
+    st.dataframe(initial)

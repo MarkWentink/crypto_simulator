@@ -198,18 +198,22 @@ if valid_bot:
         save = st.button('Save bot')
 
         def save_bot(bot, prices, db):
-            bot.new_simulate_update(prices)
+            if bot.name in [bot.name for bot in st.session_state['bots']]:
+                st.write("Can't re-use name. Delete created bots in the comparison tab or choose a different name.")
+                return
+            else:
+                bot.new_simulate_update(prices)
 
-            doc_ref = db.collection("bot_creation").document(str(datetime.today()))
-            doc_ref.set({'timestamp':datetime.today(),
-                         'bot_name':bot_name,
-                         'strategy':bot.strategy.description,
-                         'allocation':bot.initial_split,
-                         'roi':bot.roi(),
-                         'volatility':round(bot.volatility(), 2)})
-            #joblib.dump(bot, './bots/'+bot_name+'.pkl')
-            st.session_state['bots'].append(bot)
-            st.write('Bot Saved')
+                doc_ref = db.collection("bot_creation").document(str(datetime.today()))
+                doc_ref.set({'timestamp':datetime.today(),
+                            'bot_name':bot_name,
+                            'strategy':bot.strategy.description,
+                            'allocation':bot.initial_split,
+                            'roi':bot.roi(),
+                            'volatility':round(bot.volatility(), 2)})
+                #joblib.dump(bot, './bots/'+bot_name+'.pkl')
+                st.session_state['bots'].append(bot)
+                st.write('Bot Saved')
             
         
         if save:

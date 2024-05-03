@@ -124,6 +124,9 @@ class Portfolio():
         self.initial_split = initial_split
         self.start_value = start_value
         self.error_log = {'not enough cash': 0}
+        self.trades_log = pd.DataFrame()
+        self.live_positions = {}
+        self.trade_id = 0
         
         assert round(sum(list(self.initial_split.values())), 2) == 1, 'initial_split must add up to 1'
         self.initial_state = {}
@@ -169,7 +172,9 @@ class Portfolio():
         self.holdings.loc[date, 'USD'] += value
         self.holdings.loc[date, coin] = 0
         #print(f'Sold {coin} worth: {value}') 
-        self.hold_duration.pop(coin)  
+        self.hold_duration.pop(coin)
+        if coin[:-4] in self.live_positions.keys():
+            self.trades_log.loc[self.live_positions[coin[:-4]]['index'], ['sell_date', 'sell_value', 'profit']] = (date.date(), value, value-self.trades_log.loc[self.live_positions[coin[:-4]]['index'], 'buy_value'])
         return
 
     def execute_buy(self, coin, value, date, prices):
@@ -182,6 +187,9 @@ class Portfolio():
             self.holdings.loc[date, coin] = self.holdings.loc[date, coin] + (value/prices.loc[date, coin])
             #print(f'bought {coin} worth: {value}')
             self.hold_duration[coin] = 0
+            self.trades_log = pd.concat([self.trades_log, pd.DataFrame({'buy_date':[date.date()], 'coin':[coin[:-4]], 'amount':[value/prices.loc[date, coin]], 'buy_value':[value], 'sell_date':[pd.NaT], 'sell_value':[np.nan], 'profit':[np.nan]}, index = [self.trade_id])])
+            self.live_positions[coin[:-4]] = {'index':self.trade_id, 'amount':[value/prices.loc[date, coin]]}
+            self.trade_id += 1
             return     
     
     def new_simulate_update(self, prices):
@@ -251,6 +259,7 @@ class StrategyRules():
                 candidates = subset.columns[np.where((sum(requirements) == self.sell_period)
                                                  .loc[portfolio.holdings.index[-1], :])]
             sell_trades = candidates
+
         # buying
         buy_trades = []
         subset = prices.loc[:, portfolio.holdings.columns.drop('USD')]
